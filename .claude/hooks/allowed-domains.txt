@@ -1,0 +1,7 @@
+# Whitelisted domains for WebFetch
+# Add one domain per line. Subdomains are matched automatically.
+# e.g. adding "anthropic.com" also allows "docs.anthropic.com"
+# Lines starting with # are ignored.
+
+docs.anthropic.com
+code.claude.com

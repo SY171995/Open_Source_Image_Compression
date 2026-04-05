@@ -1,0 +1,8 @@
+# Allowed git remote repositories.
+# Format: full repo path without protocol or .git suffix.
+# Examples:
+#   github.com/myorg/myrepo
+#   github.com/libjpeg-turbo/libjpeg-turbo
+#
+# Lines starting with # are ignored.
+

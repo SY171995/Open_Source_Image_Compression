@@ -17,6 +17,7 @@ cmake .. -G"Unix Makefiles"
 ```
 
 ### Build
+## because it has 2 cores without hyper threading
 ```bash
 cd build
 make -j 1
@@ -42,3 +43,31 @@ ctest
 ## Important Notes
 - Always use `make -j 1` (single-threaded), not parallel builds
 - The `build/` directory is the CMake binary dir and should not be committed
+
+## Development Pipeline
+
+All coding work follows this pipeline — do not skip steps:
+
+```
+User describes feature/fix
+        ↓
+[auto] codebase-planner skill
+  → produces plan.md
+        ↓
+User says "go ahead" / "implement"
+        ↓
+[auto] codebase-developer skill
+  → reads plan.md
+  → makes changes with approval
+  → writes changelog.md
+        ↓
+User says "verify" / "check"
+        ↓
+[auto] codebase-verifier skill
+  → reads plan.md + changelog.md
+  → build + test + code review
+  → PASS / FAIL report
+        ↓
+User runs /project:commit-and-push
+  → stages + commits + push (if whitelisted remote)
+```

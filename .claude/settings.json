@@ -1,12 +1,138 @@
 {
-"permissions": {
+  "permissions": {
     "allow": [
       "Bash(make:*)",
       "Bash(cmake:*)",
       "Bash(ctest:*)",
       "Bash(git:*)",
-      "Bash(nasm:*)"
+      "Bash(nasm:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(awk:*)",
+      "Bash(find:*)"
     ],
     "deny": []
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/user-prompt-safety.py\"",
+            "timeout": 5,
+            "statusMessage": "Checking prompt for network/danger intent..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/protect-paths.sh",
+            "timeout": 10,
+            "statusMessage": "Checking protected paths..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-downloads.py\"",
+            "timeout": 10,
+            "statusMessage": "Checking for download operations..."
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-transfers.py\"",
+            "timeout": 10,
+            "statusMessage": "Checking for transfer operations..."
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-dangerous-code.py\"",
+            "timeout": 10,
+            "statusMessage": "Checking for dangerous commands..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "if": "Bash(git *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-git-remotes.py\"",
+            "timeout": 10,
+            "statusMessage": "Checking git remote whitelist..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "if": "Bash(curl *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-url-safety.py\"",
+            "timeout": 10,
+            "statusMessage": "Checking curl URL safety..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "if": "Bash(git clone *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-repo-safety.py\"",
+            "timeout": 15,
+            "statusMessage": "Analyzing repository safety..."
+          }
+        ]
+      },
+      {
+        "matcher": "WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/webfetch-guard.sh",
+            "timeout": 10,
+            "statusMessage": "Checking WebFetch whitelist..."
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/subagent-guardrail.py\"",
+            "timeout": 5,
+            "statusMessage": "Injecting safety rules into subagent..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/audit-log.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
   }
 }

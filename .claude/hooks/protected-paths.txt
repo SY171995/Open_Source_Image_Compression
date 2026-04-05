@@ -1,0 +1,9 @@
+# Protected folders - Claude/Agent cannot modify files in these folders.
+# Add one folder path per line (relative to project root).
+# Lines starting with # are ignored.
+
+# Examples (uncomment to activate):
+# simd/
+# build/
+# doc/
+TEST_EDIT/
