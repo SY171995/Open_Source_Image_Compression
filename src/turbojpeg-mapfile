@@ -116,5 +116,6 @@ TURBOJPEG_3.1
 
 TURBOJPEG_3.2
 {
+    tj3GetVersion;
     tj3InitVersion;
 } TURBOJPEG_3.1;

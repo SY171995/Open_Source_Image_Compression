@@ -1293,6 +1293,16 @@ DLLEXPORT void tj3Destroy(tjhandle handle);
 
 
 /**
+ * Returns the libjpeg-turbo version string (e.g. "3.1.90".)
+ *
+ * @return a null-terminated string containing the libjpeg-turbo version.
+ *
+ * @since TurboJPEG 3.1+
+ */
+DLLEXPORT const char *tj3GetVersion(void);
+
+
+/**
  * Returns a descriptive error message explaining why the last command failed.
  *
  * @param handle handle to a TurboJPEG instance, or NULL if the error was

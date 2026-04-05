@@ -77,6 +77,10 @@ User says "verify" / "check"
   → build + test + code review
   → PASS / FAIL report
         ↓
-User runs /project:commit-and-push
-  → stages + commits + push (if whitelisted remote)
+User runs /commit-and-push
+  → Gate 1: build (make -j 1) — STOP if fails
+  → Gate 2: full test suite (ctest --output-on-failure) — STOP if fails
+  → Show diff, propose commit message, ask user to confirm
+  → Write message to /tmp/commit_msg.txt, git commit -F /tmp/commit_msg.txt
+  → git push (if whitelisted remote)
 ```

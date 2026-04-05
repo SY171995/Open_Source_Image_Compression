@@ -21,6 +21,11 @@ command = input_data.get("tool_input", {}).get("command", "")
 if not command:
     sys.exit(0)
 
+# Guard: only inspect curl commands — the settings.json `if` filter is not
+# reliably applied, so we self-guard here the same way check-git-remotes.py does.
+if not re.search(r'\bcurl\b', command):
+    sys.exit(0)
+
 TRUSTED_API_DOMAINS = {
     "api.github.com", "api.openai.com", "api.anthropic.com",
     "registry.npmjs.org", "pypi.org", "crates.io",

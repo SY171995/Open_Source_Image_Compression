@@ -674,6 +674,13 @@ bailout:
 }
 
 
+/* TurboJPEG 3.1+ */
+DLLEXPORT const char *tj3GetVersion(void)
+{
+  return VERSION;
+}
+
+
 /* TurboJPEG 3.0+ */
 DLLEXPORT char *tj3GetErrorStr(tjhandle handle)
 {
