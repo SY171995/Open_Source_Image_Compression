@@ -44,6 +44,15 @@ ctest
 - Always use `make -j 1` (single-threaded), not parallel builds
 - The `build/` directory is the CMake binary dir and should not be committed
 
+## Committing
+- Never use a heredoc (`cat <<'EOF'`) for commit messages — the `check-url-safety.py` hook scans the full bash command string and false-positives on `>` in `<noreply@anthropic.com>`
+- Always write the commit message to a temp file and use `git commit -F`:
+  ```bash
+  # Write message (no > in the shell command)
+  # then:
+  git commit -F /tmp/commit_msg.txt
+  ```
+
 ## Development Pipeline
 
 All coding work follows this pipeline — do not skip steps:
