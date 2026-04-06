@@ -10,7 +10,9 @@
       "Bash(head:*)",
       "Bash(tail:*)",
       "Bash(awk:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   },

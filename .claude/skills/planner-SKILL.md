@@ -105,9 +105,33 @@ working at each step where possible.
 
 ### Test Plan
 - **Existing tests to update:** (list specific test files and what needs changing)
-- **New tests to write:** (describe what each test should verify)
-- **Build verification:** cd build && make -j 1
-- **Test verification:** cd build && ctest --output-on-failure
+- **Build verification:** `cd build && make -j 1`
+- **Regression coverage:** ctest subset based on changed files (see `/test` skill mapping)
+
+### Standalone Tests
+
+> **REQUIRED.** Every plan must have this section before it can be finalized.
+> Exception: pure refactors with no observable behavior change must explicitly state
+> `"No tests required: pure refactor"` — a conscious decision, not an oversight.
+
+For each behavior being added or changed, specify a standalone C test:
+
+```
+#### Test: [descriptive name]
+- **File:** `test/standalone/test_<feature>.c`
+- **Purpose:** [one sentence — what behavior is being verified]
+- **Asserts:**
+  - [specific assertion 1, e.g. "return value is non-NULL"]
+  - [specific assertion 2, e.g. "strcmp(result, \"3.1.90\") == 0"]
+- **Compile:**
+  gcc /home/chander/CODE_BASE/libjpeg-turbo/test/standalone/test_<feature>.c \
+      -I /home/chander/CODE_BASE/libjpeg-turbo/src \
+      -I /home/chander/CODE_BASE/libjpeg-turbo/build \
+      -L /home/chander/CODE_BASE/libjpeg-turbo/build \
+      -lturbojpeg -Wl,-rpath,/home/chander/CODE_BASE/libjpeg-turbo/build \
+      -o /tmp/test_<feature>
+- **Run:** `/tmp/test_<feature>` — exit 0 = PASS, non-zero = FAIL
+```
 
 ### Risks and Considerations
 - Backward compatibility concerns
@@ -118,6 +142,15 @@ working at each step where possible.
 ### Pre-conditions
 - Any branches to check out, dependencies to install, etc.
 ```
+
+### Phase 3 Gate: Standalone Tests Check
+
+**Before proceeding to Phase 4, verify the plan contains a `### Standalone Tests` section.**
+
+- If missing or empty → **STOP.** Tell the user:
+  > "This plan is incomplete — no standalone tests specified. Please describe what behavior should be tested (e.g. 'verify the function returns X given Y'), and I will add the full test specification before presenting the plan for review."
+- If explicitly marked `"No tests required: pure refactor"` → proceed.
+- If present and populated → proceed.
 
 ### Phase 4: User Review
 

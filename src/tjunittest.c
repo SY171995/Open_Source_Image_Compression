@@ -1371,6 +1371,58 @@ static int bmpTest(void)
 }
 
 
+static void getImageInfoTest(void)
+{
+  unsigned char srcBuf[32 * 24 * 3];
+  unsigned char *jpegBuf = NULL;
+  size_t jpegSize = 0;
+  tjhandle handle = NULL;
+  tjImageInfo info;
+  const char *tmpFile = "tj_getimageinfo_test.jpg";
+  int i;
+
+  /* Compress a small RGB image to a temp JPEG file */
+  if ((handle = tj3Init(TJINIT_COMPRESS)) == NULL)
+    THROW_TJ(NULL);
+  TRY_TJ(handle, tj3Set(handle, TJPARAM_QUALITY, 75));
+  TRY_TJ(handle, tj3Set(handle, TJPARAM_SUBSAMP, TJSAMP_420));
+  for (i = 0; i < (int)sizeof(srcBuf); i++)
+    srcBuf[i] = (unsigned char)(i % 256);
+  TRY_TJ(handle, tj3Compress8(handle, srcBuf, 32, 0, 24, TJPF_RGB,
+                               &jpegBuf, &jpegSize));
+  tj3Destroy(handle);  handle = NULL;
+  writeJPEG(jpegBuf, jpegSize, (char *)tmpFile);
+
+  /* Open a decompress handle and test tj3GetImageInfo() */
+  if ((handle = tj3Init(TJINIT_DECOMPRESS)) == NULL)
+    THROW_TJ(NULL);
+
+  printf("tj3GetImageInfo() ...\n");
+  TRY_TJ(handle, tj3GetImageInfo(handle, tmpFile, &info));
+  if (info.width != 32 || info.height != 24)
+    THROW("tj3GetImageInfo() returned wrong dimensions");
+  if (info.colorspace != TJCS_YCbCr)
+    THROW("tj3GetImageInfo() returned wrong colorspace");
+  if (info.numComponents != 3)
+    THROW("tj3GetImageInfo() returned wrong numComponents");
+
+  /* Error paths */
+  if (tj3GetImageInfo(handle, NULL, &info) != -1)
+    THROW("tj3GetImageInfo() should fail with NULL path");
+  if (tj3GetImageInfo(handle, tmpFile, NULL) != -1)
+    THROW("tj3GetImageInfo() should fail with NULL info");
+  if (tj3GetImageInfo(handle, "nonexistent_tj_test.jpg", &info) != -1)
+    THROW("tj3GetImageInfo() should fail with nonexistent file");
+
+  printf("  OK.\n");
+
+bailout:
+  tj3Destroy(handle);
+  tj3Free(jpegBuf);
+  remove(tmpFile);
+}
+
+
 int main(int argc, char *argv[])
 {
   int i, bmp = 0, num4bf = 5;
@@ -1412,6 +1464,7 @@ int main(int argc, char *argv[])
   if (alloc) printf("Testing automatic buffer allocation\n");
   if (doYUV) num4bf = 4;
   overflowTest();
+  if (precision == 8) getImageInfoTest();
   doTest(35, 39, _3sampleFormats, 2, TJSAMP_444, "test");
   doTest(39, 41, _4sampleFormats, num4bf, TJSAMP_444, "test");
   doTest(41, 35, _3sampleFormats, 2, TJSAMP_422, "test");

@@ -1240,6 +1240,23 @@ typedef struct tjtransform {
 } tjtransform;
 
 /**
+ * JPEG image metadata returned by #tj3GetImageInfo()
+ */
+typedef struct {
+  /** Width of the JPEG image (in pixels) */
+  int width;
+  /** Height of the JPEG image (in pixels) */
+  int height;
+  /**
+   * JPEG color space (one of the @ref TJCS "TJCS_*" constants), or
+   * #TJCS_DEFAULT if the color space could not be determined.
+   */
+  int colorspace;
+  /** Number of color components */
+  int numComponents;
+} tjImageInfo;
+
+/**
  * TurboJPEG instance handle
  */
 typedef void *tjhandle;
@@ -2925,6 +2942,26 @@ DLLEXPORT int tjSaveImage(const char *filename, unsigned char *buffer,
 /**
  * @}
  */
+
+/**
+ * Read the basic metadata from a JPEG file without performing full
+ * decompression.
+ *
+ * @param handle a handle to a TurboJPEG instance that has been initialized
+ * for decompression (see #tj3Init() with #TJINIT_DECOMPRESS)
+ *
+ * @param jpegFile path to the JPEG file to inspect
+ *
+ * @param info pointer to a #tjImageInfo structure that will be populated with
+ * the image metadata on success
+ *
+ * @return 0 if successful, or -1 if an error occurred (see #tj3GetErrorStr().)
+ *
+ * @since TurboJPEG 3.2+
+ */
+DLLEXPORT int tj3GetImageInfo(tjhandle handle, const char *jpegFile,
+                              tjImageInfo *info);
+
 
 #ifdef __cplusplus
 }

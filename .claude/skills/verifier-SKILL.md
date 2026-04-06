@@ -89,25 +89,48 @@ Do NOT apply fixes — fixes go back through the Developer skill.
 
 ### Phase 4: Test Verification
 
-#### PRE-HOOK: Before Running Tests
+#### Step 4a — Standalone Tests (feature-specific)
 
-Confirm with user: "I'd like to run the test suite. Command: `cd build && ctest --output-on-failure`. Proceed?"
+1. Read `## Standalone Tests` from `plan.md`.
+   - If section says `"No tests required: pure refactor"` → skip to Step 4b.
+2. For each test specified in the plan:
+   - Compile using the exact compile command from the plan (ask user to confirm before running)
+   - Run the binary
+   - Record result
+3. Report:
+   ```
+   ### Standalone Test Verification
+   - ✅ /tmp/test_tj3getversion — PASS
+   - ❌ /tmp/test_foo — FAIL (exit code 1, output: ...)
+   ```
+4. **If any standalone test fails → FAIL the entire verification. Do not proceed to Step 4b or commit.**
 
-#### Test Execution
+#### Step 4b — Regression Coverage (ctest subset)
 
+After standalone tests pass, run the related ctest subset based on changed files using the mapping from the `/test` skill:
+
+| Changed path | ctest `-R` pattern |
+|---|---|
+| `src/turbojpeg*`, `src/turbojpeg-mapfile` | `tjunittest` |
+| `src/tjbench*` | `tjbench` |
+| `src/jc*.c` | `cjpeg` |
+| `src/jd*.c` | `djpeg` |
+| `src/jpegtran*`, `src/transupp*` | `jpegtran` |
+| `src/rdbmp*`, `src/wrbmp*` | `bmpsizetest` |
+| `src/example*` | `example` |
+| `simd/` | run all tests |
+
+Confirm with user before running. Command example:
 ```bash
-cd /home/chander/CODE_BASE/libjpeg-turbo/build && ctest --output-on-failure 2>&1 | tee /tmp/test_output.txt
+cd /home/chander/CODE_BASE/libjpeg-turbo/build && ctest -R "^tjunittest" --output-on-failure
 ```
 
-#### POST-HOOK: After Tests
-
+Report:
 ```
-### Test Verification
-- Ran 42 tests, 42 passed ✅
-- No regressions in existing tests ✅
+### Regression Coverage
+- Ran 52 tjunittest tests, 52 passed ✅
+- No regressions ✅
 ```
-
-Map failures to specific changes from the plan.
 
 ### Phase 5: Code Quality Review
 

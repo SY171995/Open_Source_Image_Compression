@@ -681,6 +681,66 @@ DLLEXPORT const char *tj3GetVersion(void)
 }
 
 
+/* TurboJPEG 3.2+ */
+DLLEXPORT int tj3GetImageInfo(tjhandle handle, const char *jpegFile,
+                              tjImageInfo *info)
+{
+  static const char FUNCTION_NAME[] = "tj3GetImageInfo";
+  int retval = 0;
+  FILE *file = NULL;
+  unsigned char *fileBuf = NULL;
+  size_t fileLen = 0;
+  long fileSize;
+
+  GET_DINSTANCE(handle);
+  if ((this->init & DECOMPRESS) == 0)
+    THROW("Instance has not been initialized for decompression");
+
+  if (!jpegFile || !info)
+    THROW("Invalid argument");
+
+#ifdef _MSC_VER
+  if (fopen_s(&file, jpegFile, "rb") || file == NULL)
+#else
+  if ((file = fopen(jpegFile, "rb")) == NULL)
+#endif
+    THROW_UNIX("Cannot open input file");
+
+  if (fseek(file, 0, SEEK_END) != 0 || (fileSize = ftell(file)) < 0)
+    THROW_UNIX("Cannot determine file size");
+  rewind(file);
+  fileLen = (size_t)fileSize;
+  if ((fileBuf = (unsigned char *)malloc(fileLen)) == NULL)
+    THROW("Memory allocation failure");
+  if (fread(fileBuf, 1, fileLen, file) != fileLen)
+    THROW_UNIX("Cannot read input file");
+  fclose(file);  file = NULL;
+
+  CATCH_LIBJPEG(this);
+  jpeg_mem_src_tj(dinfo, fileBuf, fileLen);
+  if (jpeg_read_header(dinfo, FALSE) == JPEG_HEADER_TABLES_ONLY)
+    goto bailout;
+  setDecompParameters(this);
+  jpeg_abort_decompress(dinfo);
+
+  if (this->colorspace == TJCS_DEFAULT)
+    THROW("Could not determine colorspace of JPEG image");
+  if (this->jpegWidth < 1 || this->jpegHeight < 1)
+    THROW("Invalid data returned in header");
+
+  info->width = this->jpegWidth;
+  info->height = this->jpegHeight;
+  info->colorspace = this->colorspace;
+  info->numComponents = dinfo->num_components;
+
+bailout:
+  if (file) fclose(file);
+  free(fileBuf);
+  if (this->jerr.warning) retval = -1;
+  return retval;
+}
+
+
 /* TurboJPEG 3.0+ */
 DLLEXPORT char *tj3GetErrorStr(tjhandle handle)
 {

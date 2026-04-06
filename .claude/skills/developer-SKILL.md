@@ -87,6 +87,30 @@ For each Change Group in the plan's sequence:
    - User approved: yes
    ```
 
+### Phase 2.5: Write and Verify Standalone Tests
+
+After all Change Groups are complete, before the final summary:
+
+1. **Read `## Standalone Tests`** from `plan.md`.
+   - If section says `"No tests required: pure refactor"` → skip this phase.
+2. **For each specified test:**
+   - Announce: "Writing standalone test: `test/standalone/test_<feature>.c`"
+   - Create the file at `test/standalone/test_<feature>.c` with the logic described in the plan
+   - The test must: include `<turbojpeg.h>`, call the function under test, use `assert()` or `fprintf`+`exit(1)` for failures, exit 0 on success
+   - Show the file content and wait for user approval before writing
+3. **Compile** using the exact compile command from `plan.md`
+   - If compile fails → treat as a blocker, debug and fix, get user approval
+4. **Run** the binary — must exit 0
+   - If it fails → treat as a blocker, debug and fix the test or the feature, get user approval
+5. **Log to `changelog.md`:**
+   ```
+   ## [timestamp] File: test/standalone/test_<feature>.c
+   - Change Group: Standalone Tests
+   - Action: created
+   - Summary: standalone test for <feature> — PASS
+   - User approved: yes
+   ```
+
 ### Phase 3: Between Change Groups
 
 1. **Suggest a build check:**
